@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Faircheck</title>
+  <script>
+    (function () {
+      var stored = localStorage.getItem('theme');
+      if (stored === 'dark' || stored === 'light') {
+        document.documentElement.dataset.theme = stored;
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Faircheck</h1>
+    <nav>
+      <button data-tab="import" class="tab-btn active">Import</button>
+      <button data-tab="items" class="tab-btn">Belege &amp; Tags</button>
+      <button data-tab="split" class="tab-btn">Kosten aufteilen</button>
+      <button data-tab="calendar" class="tab-btn">Kalender</button>
+      <button data-tab="spending" class="tab-btn">Ausgaben</button>
+    </nav>
+    <button type="button" id="themeToggle" class="theme-toggle" aria-label="Farbschema wechseln"></button>
+  </header>
+
+  <main>
+    <section id="tab-import" class="tab active">
+      <h2>CSV importieren</h2>
+      <p class="muted">
+        Wähle die exportierte CSV-Datei aus. Bereits vergebene Tags bleiben beim erneuten Import
+        derselben Belege erhalten.
+      </p>
+      <div class="import-form">
+        <input type="file" id="csvFile" accept=".csv,text/csv" />
+        <button id="importBtn">Importieren</button>
+      </div>
+      <p id="importStatus" class="status"></p>
+    </section>
+
+    <section id="tab-items" class="tab">
+      <h2>Belege &amp; Tags</h2>
+      <input type="search" id="filterInput" placeholder="Nach Artikel oder Geschäft filtern..." class="filter-input" />
+      <div id="receiptsList"></div>
+    </section>
+
+    <section id="tab-split" class="tab">
+      <h2>Kosten aufteilen</h2>
+      <div class="split-form">
+        <label class="field">
+          Beleg
+          <select id="splitReceiptSelect"></select>
+        </label>
+        <label class="field">
+          Gemeinsamer Tag
+          <select id="sharedTagSelect"></select>
+        </label>
+        <fieldset id="participantsFieldset">
+          <legend>Personen-Tags</legend>
+        </fieldset>
+        <button id="splitBtn">Berechnen</button>
+      </div>
+      <div id="splitResult"></div>
+    </section>
+
+    <section id="tab-calendar" class="tab">
+      <div class="calendar-header">
+        <button type="button" id="calendarPrevBtn" aria-label="Vorheriger Monat">&lsaquo;</button>
+        <h2 id="calendarMonthLabel"></h2>
+        <button type="button" id="calendarNextBtn" aria-label="Nächster Monat">&rsaquo;</button>
+      </div>
+      <div class="calendar-weekdays">
+        <span>Mo</span><span>Di</span><span>Mi</span><span>Do</span><span>Fr</span><span>Sa</span><span>So</span>
+      </div>
+      <div id="calendarGrid" class="calendar-grid"></div>
+    </section>
+
+    <section id="tab-spending" class="tab">
+      <h2>Ausgaben</h2>
+      <div id="spendingSummary"></div>
+      <div id="spendingList"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

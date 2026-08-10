@@ -1,0 +1,27 @@
+{
+  "name": "faircheck",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "cli": "tsx src/cli.ts",
+    "web": "tsx src/cli.ts serve",
+    "test": "node --import tsx --test test/parse.test.ts test/split.test.ts test/merge.test.ts"
+  },
+  "keywords": ["receipts", "csv", "expense-splitting", "cli", "self-hosted"],
+  "author": "Leon Vitorovic",
+  "license": "MIT",
+  "description": "Parses exported receipt CSVs (name, amount, tags per line item), lets you tag items and split costs between people — CLI and local web UI on a shared JSON store.",
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.2",
+    "tsx": "^4.23.8",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^8.5.2",
+    "csv-parse": "^7.0.2",
+    "express": "^5.2.1"
+  }
+}
