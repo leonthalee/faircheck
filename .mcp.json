@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "faircheck": {
+      "command": "npx",
+      "args": ["tsx", "src/mcp/index.ts"],
+      "cwd": "C:\\Users\\Vito\\Documents\\2026\\epap parser"
+    }
+  }
+}
