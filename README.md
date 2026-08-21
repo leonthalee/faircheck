@@ -24,6 +24,7 @@ Receipt-scanning apps that export a full purchase history as CSV tend to encode 
 - **Calendar view**: which days had purchases, click through to the receipt
 - **Spending overview**: totals per month
 - **CLI and local web UI**, both operating on the same JSON store — use whichever fits, switch anytime
+- **MCP server** ([Model Context Protocol](https://modelcontextprotocol.io/)): exposes receipts, spending, tags, and cost-splitting as tools that any MCP-compatible AI assistant (Claude Desktop, Claude Code, …) can call — same core library, no duplication
 
 ## Tech stack
 
@@ -33,6 +34,7 @@ Receipt-scanning apps that export a full purchase history as CSV tend to encode 
 - [csv-parse](https://csv.js.org/parse/) for CSV parsing
 - Plain HTML/CSS/JS frontend — no framework, no build step
 - [tsx](https://github.com/privatenumber/tsx) to run TypeScript directly
+- [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk) for the MCP server
 
 ## Getting started
 
@@ -49,15 +51,41 @@ npm run cli -- split
 # Local web UI (http://localhost:3000)
 npm run web
 
+# MCP server (for Claude Desktop, Claude Code, etc.)
+npm run mcp
+
 # Tests
 npm test
 ```
+
+### MCP server
+
+The MCP server exposes Faircheck's core library as tools that an AI assistant can call directly — no separate API, no duplication of logic.
+
+**Tools:** `list_receipts`, `get_receipt`, `get_spending`, `split_costs`, `list_tags` (all read-only).
+**Resources:** `faircheck://receipts/summary` — a compact overview of the data store.
+
+To use it with Claude Desktop, add this to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "faircheck": {
+      "command": "npx",
+      "args": ["tsx", "src/mcp/index.ts"],
+      "cwd": "/path/to/faircheck"
+    }
+  }
+}
+```
+
+Then ask Claude things like *"Was habe ich im Juli ausgegeben?"* or *"Teile die Kosten zwischen Alice und Bob auf."*
 
 All commands accept an optional store path as an argument (defaults to `data/receipts.json`), so you can keep separate stores if you want.
 
 ## Architecture
 
-The core logic (`src/`: CSV parsing, tagging, cost-splitting, JSON storage) is a plain TypeScript library with no dependency on either interface. The CLI (`src/cli/`) and the web server (`src/web/`) are both thin layers on top of it, reading and writing the same JSON file — so features only need to be built once at the library level and then wired into whichever interface makes sense.
+The core logic (`src/`: CSV parsing, tagging, cost-splitting, JSON storage) is a plain TypeScript library with no dependency on any interface. The CLI (`src/cli/`), the web server (`src/web/`), and the MCP server (`src/mcp/`) are all thin layers on top of it, reading the same JSON file — so features only need to be built once at the library level and then wired into whichever interface makes sense.
 
 ## License
 
