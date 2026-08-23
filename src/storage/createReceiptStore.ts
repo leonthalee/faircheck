@@ -12,5 +12,7 @@ export async function createReceiptStore(config: StoreConfig): Promise<ReceiptSt
     return new JsonReceiptStore(config.filePath);
   }
 
-  throw new Error('Der MongoDB-Store ist noch nicht implementiert.');
+  // Imported lazily so a JSON-only user never loads the driver.
+  const { MongoReceiptStore } = await import('./mongo/mongoStore.js');
+  return MongoReceiptStore.connect(config.uri, config.dbName);
 }

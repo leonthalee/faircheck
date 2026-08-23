@@ -1,4 +1,4 @@
-import { describe, it, beforeEach, after } from 'node:test';
+import { describe, it, beforeEach, afterEach, after } from 'node:test';
 import assert from 'node:assert/strict';
 import type { Receipt } from '../src/types.js';
 import type { ReceiptStore } from '../src/storage/receiptStore.js';
@@ -52,6 +52,13 @@ export function runStoreConformanceTests(
     beforeEach(async () => {
       store = await createStore();
       await store.saveReceipts([]);
+    });
+
+    afterEach(async () => {
+      // Not optional for a connection-backed store: an unclosed client keeps
+      // the event loop alive and the test run never finishes. `close` is
+      // specified as safe to call twice, so the test that closes early is fine.
+      await store.close();
     });
 
     after(async () => {

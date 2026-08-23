@@ -1,0 +1,46 @@
+# Local MongoDB for development. Not needed unless you want the MongoDB
+# backend — without MONGODB_URI, Faircheck uses a JSON file and no database.
+#
+#   docker compose up -d      start
+#   docker compose down       stop, keep the data
+#   docker compose down -v    stop and delete the data
+#
+# A single node, no replica set. Every write this application performs is a
+# single-document operation, and MongoDB guarantees those to be atomic on
+# their own — a replica set would only be needed for multi-document
+# transactions or change streams, neither of which the data model requires.
+
+services:
+  mongo:
+    # Pinned to a major version: a future "latest" cannot silently break this.
+    image: mongo:8
+
+    ports:
+      - '27017:27017'
+
+    environment:
+      # Trivial on purpose: these credentials only ever reach a container on
+      # your own machine, and the file is public. Never reuse them anywhere
+      # that matters.
+      #
+      # The user is created ONLY on first start, while the volume is still
+      # empty. Changing the password later has no effect until you wipe the
+      # volume with `docker compose down -v`.
+      MONGO_INITDB_ROOT_USERNAME: faircheck
+      MONGO_INITDB_ROOT_PASSWORD: faircheck
+
+    # A named volume, so the data outlives the container: `down` throws the
+    # container away and keeps the database, `down -v` deletes both.
+    volumes:
+      - mongo-data:/data/db
+
+    # Makes `docker compose up --wait` deterministic — the container counts as
+    # ready only once mongod actually answers.
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mongo-data:
