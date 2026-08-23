@@ -1,0 +1,200 @@
+[
+  {
+    "id": "SAMPLEID000000000001",
+    "label": null,
+    "date": "2026-03-03T16:20:00.000Z",
+    "store": "MUSTERMARKT",
+    "address": "Beispielweg 12, 79100 Freiburg im Breisgau, Germany",
+    "description": null,
+    "amount": -17.06,
+    "amountBeforeTax": null,
+    "paymentMethod": "Karte (Visa)",
+    "category": "Lebensmittel",
+    "currency": "EUR",
+    "transactionNumber": null,
+    "receiptNumber": null,
+    "notes": null,
+    "items": [
+      {
+        "id": "SAMPLEID000000000001:0",
+        "name": "BIO BANANEN",
+        "category": null,
+        "price": -1.49,
+        "taxRate": null,
+        "priceBeforeTax": null,
+        "quantity": 0.62,
+        "unit": "KILOGRAM",
+        "unitPrice": -2.4,
+        "unitPriceBeforeTax": null,
+        "tags": [
+          "gemeinsam"
+        ]
+      },
+      {
+        "id": "SAMPLEID000000000001:1",
+        "name": "VOLLKORNBROT",
+        "category": null,
+        "price": -2.79,
+        "taxRate": null,
+        "priceBeforeTax": null,
+        "quantity": null,
+        "unit": null,
+        "unitPrice": null,
+        "unitPriceBeforeTax": null,
+        "tags": [
+          "gemeinsam"
+        ]
+      },
+      {
+        "id": "SAMPLEID000000000001:2",
+        "name": "HAFERDRINK",
+        "category": null,
+        "price": -1.99,
+        "taxRate": null,
+        "priceBeforeTax": null,
+        "quantity": null,
+        "unit": null,
+        "unitPrice": null,
+        "unitPriceBeforeTax": null,
+        "tags": [
+          "Alice"
+        ]
+      },
+      {
+        "id": "SAMPLEID000000000001:3",
+        "name": "TOMATEN",
+        "category": null,
+        "price": -2.1,
+        "taxRate": null,
+        "priceBeforeTax": null,
+        "quantity": 0.84,
+        "unit": "KILOGRAM",
+        "unitPrice": -2.5,
+        "unitPriceBeforeTax": null,
+        "tags": [
+          "Alice",
+          "Bob"
+        ]
+      },
+      {
+        "id": "SAMPLEID000000000001:4",
+        "name": "JOGHURT NATUR",
+        "category": null,
+        "price": -1.95,
+        "taxRate": null,
+        "priceBeforeTax": null,
+        "quantity": 3,
+        "unit": null,
+        "unitPrice": -0.65,
+        "unitPriceBeforeTax": null,
+        "tags": [
+          "Bob"
+        ]
+      },
+      {
+        "id": "SAMPLEID000000000001:5",
+        "name": "PFAND",
+        "category": null,
+        "price": 0.25,
+        "taxRate": null,
+        "priceBeforeTax": null,
+        "quantity": null,
+        "unit": null,
+        "unitPrice": null,
+        "unitPriceBeforeTax": null,
+        "tags": []
+      },
+      {
+        "id": "SAMPLEID000000000001:6",
+        "name": "KAFFEEBOHNEN",
+        "category": null,
+        "price": -6.99,
+        "taxRate": null,
+        "priceBeforeTax": null,
+        "quantity": null,
+        "unit": null,
+        "unitPrice": null,
+        "unitPriceBeforeTax": null,
+        "tags": [
+          "Alice"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "SAMPLEID000000000002",
+    "label": "Wocheneinkauf",
+    "date": "2026-05-12T08:30:00.000Z",
+    "store": "TESTMARKT",
+    "address": "Musterstrasse 3, 79100 Freiburg im Breisgau, Germany",
+    "description": null,
+    "amount": -9.4,
+    "amountBeforeTax": null,
+    "paymentMethod": "Bar",
+    "category": "Lebensmittel",
+    "currency": "EUR",
+    "transactionNumber": null,
+    "receiptNumber": null,
+    "notes": null,
+    "items": [
+      {
+        "id": "SAMPLEID000000000002:0",
+        "name": "MILCH",
+        "category": null,
+        "price": -1.29,
+        "taxRate": null,
+        "priceBeforeTax": null,
+        "quantity": null,
+        "unit": null,
+        "unitPrice": null,
+        "unitPriceBeforeTax": null,
+        "tags": [
+          "gemeinsam"
+        ]
+      },
+      {
+        "id": "SAMPLEID000000000002:1",
+        "name": "SPAGHETTI",
+        "category": null,
+        "price": -1.49,
+        "taxRate": null,
+        "priceBeforeTax": null,
+        "quantity": null,
+        "unit": null,
+        "unitPrice": null,
+        "unitPriceBeforeTax": null,
+        "tags": [
+          "Alice"
+        ]
+      },
+      {
+        "id": "SAMPLEID000000000002:2",
+        "name": "PARMESAN",
+        "category": null,
+        "price": -4.99,
+        "taxRate": null,
+        "priceBeforeTax": null,
+        "quantity": null,
+        "unit": null,
+        "unitPrice": null,
+        "unitPriceBeforeTax": null,
+        "tags": [
+          "gemeinsam"
+        ]
+      },
+      {
+        "id": "SAMPLEID000000000002:3",
+        "name": "BASILIKUM",
+        "category": null,
+        "price": -1.63,
+        "taxRate": null,
+        "priceBeforeTax": null,
+        "quantity": null,
+        "unit": null,
+        "unitPrice": null,
+        "unitPriceBeforeTax": null,
+        "tags": []
+      }
+    ]
+  }
+]
