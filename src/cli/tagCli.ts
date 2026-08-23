@@ -1,7 +1,6 @@
 import { confirm, input, search } from '@inquirer/prompts';
 import type { Receipt, ReceiptItem } from '../types.js';
-import { loadReceipts, saveReceipts } from '../storage/jsonStore.js';
-import { DEFAULT_STORE_PATH } from './importCli.js';
+import type { ReceiptStore } from '../storage/receiptStore.js';
 import { MAX_SEARCH_RESULTS, formatDateTime, isExitPromptError } from './receiptDisplay.js';
 
 interface FlatItem {
@@ -19,18 +18,22 @@ function describe({ receipt, item }: FlatItem): string {
   return `${formatDateTime(receipt.date)} ${receipt.store} — ${item.name} (${price})${tags}`;
 }
 
-export async function runTagCli(args: string[]): Promise<void> {
-  const storePath = args[0] ?? DEFAULT_STORE_PATH;
-  const receipts = loadReceipts(storePath);
+export async function runTagCli(store: ReceiptStore): Promise<void> {
+  // Loaded once and held for the whole session: `flattenItems` hands out live
+  // references into this array, and every save below writes it back. Reloading
+  // inside the loop would detach those references — the next edit would then be
+  // applied to an orphaned object and saved from a stale snapshot, losing data
+  // silently.
+  const receipts = await store.loadReceipts();
 
   if (receipts.length === 0) {
-    console.log(`Keine Belege in "${storePath}" gefunden. Erst importieren:`);
-    console.log(`  npm run cli -- import <csv-datei> ${storePath}`);
+    console.log(`Keine Belege in "${store.describe()}" gefunden. Erst importieren:`);
+    console.log('  npm run cli -- import <csv-datei>');
     return;
   }
 
   const items = flattenItems(receipts);
-  console.log(`${receipts.length} Beleg(e), ${items.length} Artikel geladen aus "${storePath}".`);
+  console.log(`${receipts.length} Beleg(e), ${items.length} Artikel geladen aus "${store.describe()}".`);
 
   try {
     for (;;) {
@@ -61,7 +64,7 @@ export async function runTagCli(args: string[]): Promise<void> {
         .map((tag) => tag.trim())
         .filter((tag) => tag !== '');
 
-      saveReceipts(storePath, receipts);
+      await store.saveReceipts(receipts);
       console.log(`Gespeichert: ${describe(selected)}`);
 
       const again = await confirm({ message: 'Weiteren Artikel taggen?', default: true });

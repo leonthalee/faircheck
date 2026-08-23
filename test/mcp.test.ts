@@ -2,6 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { createServer } from '../src/mcp/server.js';
+import { JsonReceiptStore } from '../src/storage/jsonStore.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 
@@ -15,7 +16,7 @@ const STORE = path.join(import.meta.dirname, 'fixtures', 'store.json');
 
 /** Runs `body` against a connected client, closing both ends even if it throws. */
 async function withClient(body: (client: Client) => Promise<void>): Promise<void> {
-  const server = createServer(STORE);
+  const server = createServer(new JsonReceiptStore(STORE));
   const client = new Client({ name: 'test', version: '0.1' });
   const [ct, st] = InMemoryTransport.createLinkedPair();
   await Promise.all([server.connect(st), client.connect(ct)]);
@@ -133,7 +134,8 @@ describe('MCP server', () => {
         participants: ['Alice', 'Bob'],
       });
       // TOMATEN is tagged with both participants, so it is split -1.05 each
-      // rather than counted as shared. PFAND and BASILIKUM carry no tag at all.
+      // rather than counted as shared. PFAND and BASILIKUM carry no tag at all;
+      // they are listed in store order, which is newest receipt first.
       assert.equal(
         text,
         [
@@ -143,8 +145,8 @@ describe('MCP server', () => {
           'Bob: individual -3.00 EUR + shared -5.28 EUR = -8.28 EUR',
           '',
           '2 unassigned item(s):',
-          '  PFAND  0.25 EUR',
           '  BASILIKUM  -1.63 EUR',
+          '  PFAND  0.25 EUR',
         ].join('\n'),
       );
     });

@@ -2,7 +2,11 @@ export * from './types.js';
 export { parseReceiptsCsv } from './csv/parseReceipts.js';
 export type { ParseReceiptsOptions } from './csv/parseReceipts.js';
 export { parseItems } from './csv/parseItems.js';
-export { loadReceipts, saveReceipts } from './storage/jsonStore.js';
+export type { ReceiptStore } from './storage/receiptStore.js';
+export { createReceiptStore } from './storage/createReceiptStore.js';
+export { JsonReceiptStore, loadReceipts, saveReceipts } from './storage/jsonStore.js';
+export { resolveStoreConfig, DEFAULT_STORE_PATH } from './config.js';
+export type { StoreConfig } from './config.js';
 export {
   mergeReceipts,
   setItemTags,

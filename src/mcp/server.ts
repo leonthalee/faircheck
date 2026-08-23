@@ -1,16 +1,8 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { resolve } from 'node:path';
-import { loadReceipts } from '../storage/jsonStore.js';
+import type { ReceiptStore } from '../storage/receiptStore.js';
 import { computeSplit } from '../split.js';
 import { collectTags } from '../tags.js';
-import type { Receipt } from '../types.js';
-
-const DEFAULT_STORE = resolve('data/receipts.json');
-
-function getReceipts(storePath?: string): Receipt[] {
-  return loadReceipts(storePath ?? DEFAULT_STORE);
-}
 
 function fmtDate(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -20,7 +12,7 @@ function fmtPrice(n: number, currency = 'EUR'): string {
   return `${n.toFixed(2)} ${currency}`;
 }
 
-export function createServer(storePath?: string): McpServer {
+export function createServer(store: ReceiptStore): McpServer {
   const server = new McpServer({
     name: 'faircheck',
     version: '1.0.0',
@@ -33,7 +25,7 @@ export function createServer(storePath?: string): McpServer {
     'List all receipts (date, store, total, item count). Optionally filter by year and/or month.',
     { year: z.number().int().optional(), month: z.number().int().min(1).max(12).optional() },
     async ({ year, month }) => {
-      let receipts = getReceipts(storePath);
+      let receipts = await store.loadReceipts();
 
       if (year !== undefined) {
         receipts = receipts.filter((r) => r.date.getFullYear() === year);
@@ -69,7 +61,7 @@ export function createServer(storePath?: string): McpServer {
     'Get full details of a single receipt by its ID, including all line items with prices and tags.',
     { receipt_id: z.string() },
     async ({ receipt_id }) => {
-      const receipts = getReceipts(storePath);
+      const receipts = await store.loadReceipts();
       const receipt = receipts.find((r) => r.id === receipt_id);
 
       if (!receipt) {
@@ -108,7 +100,7 @@ export function createServer(storePath?: string): McpServer {
     'Show total spending per month, with receipt count. Optionally filter by year.',
     { year: z.number().int().optional() },
     async ({ year }) => {
-      let receipts = getReceipts(storePath);
+      let receipts = await store.loadReceipts();
 
       if (year !== undefined) {
         receipts = receipts.filter((r) => r.date.getFullYear() === year);
@@ -152,7 +144,7 @@ export function createServer(storePath?: string): McpServer {
       receipt_id: z.string().optional().describe('Limit split to a single receipt'),
     },
     async ({ shared_tag, participants, receipt_id }) => {
-      let receipts = getReceipts(storePath);
+      let receipts = await store.loadReceipts();
 
       if (receipt_id !== undefined) {
         receipts = receipts.filter((r) => r.id === receipt_id);
@@ -184,7 +176,7 @@ export function createServer(storePath?: string): McpServer {
   );
 
   server.tool('list_tags', 'List all tags currently used across all receipts, with usage count.', {}, async () => {
-    const receipts = getReceipts(storePath);
+    const receipts = await store.loadReceipts();
     const tags = collectTags(receipts);
 
     if (tags.size === 0) {
@@ -200,7 +192,7 @@ export function createServer(storePath?: string): McpServer {
   // --- Resources ---
 
   server.resource('summary', 'faircheck://receipts/summary', async () => {
-    const receipts = getReceipts(storePath);
+    const receipts = await store.loadReceipts();
 
     if (receipts.length === 0) {
       return { contents: [{ uri: 'faircheck://receipts/summary', mimeType: 'text/plain', text: 'No receipts loaded.' }] };

@@ -1,23 +1,23 @@
 import express from 'express';
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import path from 'node:path';
-import { loadReceipts, saveReceipts } from '../storage/jsonStore.js';
+import type { ReceiptStore } from '../storage/receiptStore.js';
 import { parseReceiptsCsv } from '../csv/parseReceipts.js';
 import { mergeReceipts, setItemTags, setReceiptLabel, clearReceiptTags, deleteReceipt, collectTags } from '../tags.js';
 import { computeSplit } from '../split.js';
 
-export function createServer(storePath: string) {
+export function createServer(store: ReceiptStore) {
   const app = express();
   app.use(express.json({ limit: '20mb' }));
   app.use(express.text({ type: 'text/csv', limit: '20mb' }));
   app.use(express.static(path.join(import.meta.dirname, 'public')));
 
-  app.get('/api/receipts', (_req: Request, res: Response) => {
-    res.json(loadReceipts(storePath));
+  app.get('/api/receipts', async (_req: Request, res: Response) => {
+    res.json(await store.loadReceipts());
   });
 
-  app.get('/api/tags', (_req: Request, res: Response) => {
-    const receipts = loadReceipts(storePath);
+  app.get('/api/tags', async (_req: Request, res: Response) => {
+    const receipts = await store.loadReceipts();
     const counts = collectTags(receipts);
     const tags = [...counts.entries()]
       .map(([tag, count]) => ({ tag, count }))
@@ -25,7 +25,7 @@ export function createServer(storePath: string) {
     res.json(tags);
   });
 
-  app.post('/api/import', (req: Request, res: Response) => {
+  app.post('/api/import', async (req: Request, res: Response) => {
     const csvContent = typeof req.body === 'string' ? req.body : undefined;
     if (!csvContent) {
       res.status(400).json({ error: 'CSV-Inhalt fehlt (Content-Type: text/csv erwartet)' });
@@ -33,13 +33,13 @@ export function createServer(storePath: string) {
     }
 
     const fresh = parseReceiptsCsv(csvContent);
-    const existing = loadReceipts(storePath);
+    const existing = await store.loadReceipts();
     const merged = mergeReceipts(fresh, existing);
-    saveReceipts(storePath, merged);
+    await store.saveReceipts(merged);
     res.json(merged);
   });
 
-  app.put('/api/items/:itemId/tags', (req: Request, res: Response) => {
+  app.put('/api/items/:itemId/tags', async (req: Request, res: Response) => {
     const itemId = String(req.params['itemId'] ?? '');
     const rawTags = req.body?.tags;
     if (!Array.isArray(rawTags)) {
@@ -48,18 +48,18 @@ export function createServer(storePath: string) {
     }
 
     const tags = rawTags.map((tag) => String(tag).trim()).filter((tag) => tag !== '');
-    const receipts = loadReceipts(storePath);
+    const receipts = await store.loadReceipts();
     const ok = setItemTags(receipts, itemId, tags);
     if (!ok) {
       res.status(404).json({ error: 'Item nicht gefunden' });
       return;
     }
 
-    saveReceipts(storePath, receipts);
+    await store.saveReceipts(receipts);
     res.json({ ok: true });
   });
 
-  app.post('/api/receipts/:receiptId/tags', (req: Request, res: Response) => {
+  app.post('/api/receipts/:receiptId/tags', async (req: Request, res: Response) => {
     const receiptId = String(req.params['receiptId'] ?? '');
     const rawTags = req.body?.tags;
     const tags = Array.isArray(rawTags)
@@ -71,7 +71,7 @@ export function createServer(storePath: string) {
       return;
     }
 
-    const receipts = loadReceipts(storePath);
+    const receipts = await store.loadReceipts();
     const receipt = receipts.find((r) => r.id === receiptId);
     if (!receipt) {
       res.status(404).json({ error: 'Beleg nicht gefunden' });
@@ -84,53 +84,53 @@ export function createServer(storePath: string) {
       }
     }
 
-    saveReceipts(storePath, receipts);
+    await store.saveReceipts(receipts);
     res.json(receipt);
   });
 
-  app.put('/api/receipts/:receiptId/label', (req: Request, res: Response) => {
+  app.put('/api/receipts/:receiptId/label', async (req: Request, res: Response) => {
     const receiptId = String(req.params['receiptId'] ?? '');
     const rawLabel = req.body?.label;
     const label = typeof rawLabel === 'string' && rawLabel.trim() !== '' ? rawLabel.trim() : null;
 
-    const receipts = loadReceipts(storePath);
+    const receipts = await store.loadReceipts();
     const ok = setReceiptLabel(receipts, receiptId, label);
     if (!ok) {
       res.status(404).json({ error: 'Beleg nicht gefunden' });
       return;
     }
 
-    saveReceipts(storePath, receipts);
+    await store.saveReceipts(receipts);
     res.json(receipts.find((r) => r.id === receiptId));
   });
 
-  app.delete('/api/receipts/:receiptId/tags', (req: Request, res: Response) => {
+  app.delete('/api/receipts/:receiptId/tags', async (req: Request, res: Response) => {
     const receiptId = String(req.params['receiptId'] ?? '');
-    const receipts = loadReceipts(storePath);
+    const receipts = await store.loadReceipts();
     const ok = clearReceiptTags(receipts, receiptId);
     if (!ok) {
       res.status(404).json({ error: 'Beleg nicht gefunden' });
       return;
     }
 
-    saveReceipts(storePath, receipts);
+    await store.saveReceipts(receipts);
     res.json(receipts.find((r) => r.id === receiptId));
   });
 
-  app.delete('/api/receipts/:receiptId', (req: Request, res: Response) => {
+  app.delete('/api/receipts/:receiptId', async (req: Request, res: Response) => {
     const receiptId = String(req.params['receiptId'] ?? '');
-    const receipts = loadReceipts(storePath);
+    const receipts = await store.loadReceipts();
     const ok = deleteReceipt(receipts, receiptId);
     if (!ok) {
       res.status(404).json({ error: 'Beleg nicht gefunden' });
       return;
     }
 
-    saveReceipts(storePath, receipts);
+    await store.saveReceipts(receipts);
     res.json({ ok: true });
   });
 
-  app.post('/api/split', (req: Request, res: Response) => {
+  app.post('/api/split', async (req: Request, res: Response) => {
     const sharedTag = req.body?.sharedTag;
     const participants = req.body?.participants;
     const receiptId = req.body?.receiptId;
@@ -139,7 +139,7 @@ export function createServer(storePath: string) {
       return;
     }
 
-    let receipts = loadReceipts(storePath);
+    let receipts = await store.loadReceipts();
     if (typeof receiptId === 'string' && receiptId !== '') {
       const receipt = receipts.find((r) => r.id === receiptId);
       if (!receipt) {
@@ -151,6 +151,16 @@ export function createServer(storePath: string) {
 
     const result = computeSplit(receipts, sharedTag, participants);
     res.json(result);
+  });
+
+  // Express 5 forwards a rejected promise from a handler here on its own, so
+  // the handlers above need no try/catch. Without this, though, the built-in
+  // handler would answer an otherwise-JSON API with an HTML stack trace.
+  // Must be registered last, and the four arguments are what mark it as error
+  // middleware.
+  app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    console.error(err);
+    res.status(500).json({ error: 'Interner Serverfehler' });
   });
 
   return app;

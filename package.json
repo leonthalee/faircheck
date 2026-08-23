@@ -1,14 +1,17 @@
 {
   "name": "faircheck",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "main": "index.js",
   "type": "module",
+  "engines": {
+    "node": ">=20.12"
+  },
   "scripts": {
     "start": "tsx src/index.ts",
     "cli": "tsx src/cli.ts",
     "web": "tsx src/cli.ts serve",
     "mcp": "tsx src/mcp/index.ts",
-    "test": "node --import tsx --test test/parse.test.ts test/split.test.ts test/merge.test.ts test/mcp.test.ts"
+    "test": "node --import tsx --test test/parse.test.ts test/split.test.ts test/merge.test.ts test/mcp.test.ts test/jsonStore.test.ts test/config.test.ts"
   },
   "keywords": [
     "receipts",

@@ -1,16 +1,14 @@
 import { confirm, search } from '@inquirer/prompts';
 import type { Receipt } from '../types.js';
-import { loadReceipts, saveReceipts } from '../storage/jsonStore.js';
 import { clearReceiptTags } from '../tags.js';
-import { DEFAULT_STORE_PATH } from './importCli.js';
+import type { ReceiptStore } from '../storage/receiptStore.js';
 import { MAX_SEARCH_RESULTS, describeReceipt, receiptMatches, isExitPromptError } from './receiptDisplay.js';
 
-export async function runUntagReceiptCli(args: string[]): Promise<void> {
-  const storePath = args[0] ?? DEFAULT_STORE_PATH;
-  const receipts = loadReceipts(storePath);
+export async function runUntagReceiptCli(store: ReceiptStore): Promise<void> {
+  const receipts = await store.loadReceipts();
 
   if (receipts.length === 0) {
-    console.log(`Keine Belege in "${storePath}" gefunden.`);
+    console.log(`Keine Belege in "${store.describe()}" gefunden.`);
     return;
   }
 
@@ -34,7 +32,7 @@ export async function runUntagReceiptCli(args: string[]): Promise<void> {
     }
 
     clearReceiptTags(receipts, receipt.id);
-    saveReceipts(storePath, receipts);
+    await store.saveReceipts(receipts);
     console.log(`Tags entfernt: ${describeReceipt(receipt)}`);
   } catch (error) {
     if (isExitPromptError(error)) {
