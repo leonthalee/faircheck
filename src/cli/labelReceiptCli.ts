@@ -1,16 +1,14 @@
 import { input, search } from '@inquirer/prompts';
 import type { Receipt } from '../types.js';
-import { loadReceipts, saveReceipts } from '../storage/jsonStore.js';
 import { setReceiptLabel } from '../tags.js';
-import { DEFAULT_STORE_PATH } from './importCli.js';
+import type { ReceiptStore } from '../storage/receiptStore.js';
 import { MAX_SEARCH_RESULTS, describeReceipt, receiptMatches, isExitPromptError } from './receiptDisplay.js';
 
-export async function runLabelReceiptCli(args: string[]): Promise<void> {
-  const storePath = args[0] ?? DEFAULT_STORE_PATH;
-  const receipts = loadReceipts(storePath);
+export async function runLabelReceiptCli(store: ReceiptStore): Promise<void> {
+  const receipts = await store.loadReceipts();
 
   if (receipts.length === 0) {
-    console.log(`Keine Belege in "${storePath}" gefunden.`);
+    console.log(`Keine Belege in "${store.describe()}" gefunden.`);
     return;
   }
 
@@ -31,7 +29,7 @@ export async function runLabelReceiptCli(args: string[]): Promise<void> {
 
     const label = answer.trim() === '' ? null : answer.trim();
     setReceiptLabel(receipts, receipt.id, label);
-    saveReceipts(storePath, receipts);
+    await store.saveReceipts(receipts);
     console.log(label ? `Name gesetzt: "${label}"` : 'Name entfernt.');
   } catch (error) {
     if (isExitPromptError(error)) {

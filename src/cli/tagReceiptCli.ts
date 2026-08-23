@@ -1,16 +1,14 @@
 import { input, search } from '@inquirer/prompts';
 import type { Receipt } from '../types.js';
-import { loadReceipts, saveReceipts } from '../storage/jsonStore.js';
-import { DEFAULT_STORE_PATH } from './importCli.js';
+import type { ReceiptStore } from '../storage/receiptStore.js';
 import { MAX_SEARCH_RESULTS, describeReceipt, receiptMatches, isExitPromptError } from './receiptDisplay.js';
 
-export async function runTagReceiptCli(args: string[]): Promise<void> {
-  const storePath = args[0] ?? DEFAULT_STORE_PATH;
-  const receipts = loadReceipts(storePath);
+export async function runTagReceiptCli(store: ReceiptStore): Promise<void> {
+  const receipts = await store.loadReceipts();
 
   if (receipts.length === 0) {
-    console.log(`Keine Belege in "${storePath}" gefunden. Erst importieren:`);
-    console.log(`  npm run cli -- import <csv-datei> ${storePath}`);
+    console.log(`Keine Belege in "${store.describe()}" gefunden. Erst importieren:`);
+    console.log('  npm run cli -- import <csv-datei>');
     return;
   }
 
@@ -43,7 +41,7 @@ export async function runTagReceiptCli(args: string[]): Promise<void> {
       }
     }
 
-    saveReceipts(storePath, receipts);
+    await store.saveReceipts(receipts);
     console.log(`"${tags.join(', ')}" zu ${receipt.items.length} Artikel(n) hinzugefügt: ${describeReceipt(receipt)}`);
   } catch (error) {
     if (isExitPromptError(error)) {

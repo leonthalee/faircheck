@@ -1,17 +1,17 @@
-import path from 'node:path';
 import { importCsvFile } from '../importCsv.js';
+import type { ReceiptStore } from '../storage/receiptStore.js';
 
-export const DEFAULT_STORE_PATH = path.join('data', 'receipts.json');
-
-export function runImport(args: string[]): void {
-  const [csvPath, storePath = DEFAULT_STORE_PATH] = args;
+export async function runImport(args: string[], store: ReceiptStore): Promise<void> {
+  // args[1] is the optional store path, already resolved into `store` by the
+  // caller; only the CSV path is still read here.
+  const [csvPath] = args;
   if (!csvPath) {
     console.error('Verwendung: import <csv-datei> [store-datei]');
     process.exitCode = 1;
     return;
   }
 
-  const receipts = importCsvFile(csvPath, storePath);
+  const receipts = await importCsvFile(csvPath, store);
   const itemCount = receipts.reduce((sum, r) => sum + r.items.length, 0);
-  console.log(`Importiert: ${receipts.length} Beleg(e), ${itemCount} Artikel -> ${storePath}`);
+  console.log(`Importiert: ${receipts.length} Beleg(e), ${itemCount} Artikel -> ${store.describe()}`);
 }
