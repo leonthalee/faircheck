@@ -11,7 +11,7 @@
     "cli": "tsx src/cli.ts",
     "web": "tsx src/cli.ts serve",
     "mcp": "tsx src/mcp/index.ts",
-    "test": "node --import tsx --test test/parse.test.ts test/split.test.ts test/merge.test.ts test/mcp.test.ts test/jsonStore.test.ts test/config.test.ts"
+    "test": "node --import tsx --test test/parse.test.ts test/split.test.ts test/merge.test.ts test/mcp.test.ts test/jsonStore.test.ts test/config.test.ts test/mapping.test.ts test/mongoStore.test.ts"
   },
   "keywords": [
     "receipts",
@@ -33,6 +33,7 @@
     "@inquirer/prompts": "^8.5.2",
     "@modelcontextprotocol/sdk": "^1.30.0",
     "csv-parse": "^7.0.2",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mongodb": "^7.5.0"
   }
 }

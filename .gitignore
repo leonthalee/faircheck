@@ -3,3 +3,9 @@ data/
 .claude/
 *.log
 *.tmp-*
+
+# Never commit connection strings — they carry credentials.
+# .env.example is the template and is meant to be committed.
+.env
+.env.*
+!.env.example
