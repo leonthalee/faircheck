@@ -380,6 +380,13 @@ async function onTagsInputChange(event) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? 'Fehler beim Speichern');
+
+    // Refresh the cache, but deliberately without renderReceipts(): the other
+    // write handlers re-render, which is fine for them, but here it would tear
+    // out the input the user is still working in. The row already shows the
+    // right value — the input holds what was just sent — so only state was
+    // stale, and the split view builds its tag choices from state.
+    await fetchReceipts();
     flash(input);
   } catch (err) {
     alert('Fehler: ' + err.message);
