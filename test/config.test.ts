@@ -1,9 +1,19 @@
-import { test, beforeEach } from 'node:test';
+import { test, before, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { resolveStoreConfig, DEFAULT_STORE_PATH } from '../src/config.js';
 
 const VARS = ['MONGODB_URI', 'MONGODB_DB', 'FAIRCHECK_STORE', 'FAIRCHECK_STORE_PATH'] as const;
+
+// resolveStoreConfig reads .env lazily, on its first call. Without this, that
+// read would land in the middle of the first test — after beforeEach had
+// cleared the environment — and repopulate it from whatever .env the developer
+// happens to have. Triggering it once up front makes these tests independent
+// of that file; otherwise they pass on a fresh clone and fail on a machine
+// that is configured for MongoDB.
+before(() => {
+  resolveStoreConfig();
+});
 
 beforeEach(() => {
   for (const name of VARS) delete process.env[name];
