@@ -22,7 +22,7 @@
   ],
   "author": "Leon Vitorovic",
   "license": "MIT",
-  "description": "Parses exported receipt CSVs (name, amount, tags per line item), lets you tag items and split costs between people — CLI and local web UI on a shared JSON store.",
+  "description": "Parses exported receipt CSVs (name, amount, tags per line item), lets you tag items and split costs between people — CLI, local web UI and MCP server on a shared store, backed by a JSON file or MongoDB.",
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/node": "^26.1.2",
