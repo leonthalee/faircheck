@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Both versions run to completion even if one fails — a failure that only
+      # appears on the older Node is exactly what this matrix is for.
+      fail-fast: false
+      matrix:
+        # 20 is the floor declared in package.json engines, 22 the current LTS.
+        node: ['20', '22']
+
+    services:
+      # Without this the MongoDB tests skip themselves and the store would only
+      # ever be checked against the JSON backend in CI. Same image and same
+      # credentials as docker-compose.yml, so local and CI agree.
+      mongo:
+        image: mongo:8
+        env:
+          MONGO_INITDB_ROOT_USERNAME: faircheck
+          MONGO_INITDB_ROOT_PASSWORD: faircheck
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      # ci rather than install: installs exactly what package-lock.json pins,
+      # so a run cannot silently pick up a newer transitive dependency.
+      - run: npm ci
+
+      - name: Typprüfung
+        run: npx tsc --noEmit
+
+      - name: Tests
+        run: npm test
+        env:
+          MONGODB_TEST_URI: mongodb://faircheck:faircheck@localhost:27017/?authSource=admin
